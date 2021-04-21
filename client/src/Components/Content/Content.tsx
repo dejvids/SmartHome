@@ -7,7 +7,7 @@ const Content = () => {
   return (
     <div className="content-component">
         <div className="content-box">
-          <GridView />
+          <GridView/>
         </div>
     </div>
   );

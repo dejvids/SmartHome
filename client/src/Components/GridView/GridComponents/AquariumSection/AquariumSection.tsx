@@ -1,27 +1,9 @@
 import * as React from 'react';
 import { getWaterTemp } from '../../../../restService/restService';
+import { SensorsProps } from '../../GridView';
 import './AquariumSection.scss';
 
-const { useEffect, useState } = React;
-
-const AquariumSection = () => {
-
-  const [waterTemp, setWaterTemp] = useState('--');
-
-  useEffect(() => {
-    setTemperatureValue();
-    setInterval(
-      setTemperatureValue, 
-    5000)
-  }, [])
-
-  const setTemperatureValue = async () => {
-    try {
-      setWaterTemp(await getWaterTemp());
-    } catch (e) {
-      console.log(e); 
-    }
-  }
+const AquariumSection : React.FC<SensorsProps> = ({waterTemp}) => {
 
   return (
     <div className="aquarium-section-component">

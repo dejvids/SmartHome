@@ -12,6 +12,9 @@ import { setSessionData, clearSession } from '../../reducers/session/session';
 import { getCookie, eraseCookie } from '../../helpers';
 import { ApplicationState } from 'src/reducers';
 
+import { HttpTransportType, HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { useState } from 'react';
+
 const { useEffect } = React;
 
 interface AppProps {
@@ -24,11 +27,16 @@ interface AppProps {
 
 const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessionData, clearSession }) => {
 
+
+  //const [ connection, setConnection ] = useState<HubConnection | null>(null);
+  //const [sensorsData, setData] = useState(null);
   useEffect(() => {
     const token = getCookie('token');
     if (token) {
       setSessionData({ authToken: token });
     }
+
+   // setupSignalR();
   }, [])
 
   useEffect(() => {
@@ -47,6 +55,8 @@ const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessi
       setCurrentUser();
     }
   }, [authToken, username])
+
+  
 
   useEffect(() => {
     fetchCurrentWeather();
@@ -88,6 +98,8 @@ const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessi
     const hourly = await getHourlyWeather();
     setWeatherData({ hourly });
   }
+
+ 
 
   return (
       <div className="App">

@@ -1,6 +1,6 @@
-import { HttpTransportType, HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import { HttpTransportType, HubConnectionBuilder } from "@microsoft/signalr";
 
-export const setupHub = (onClose: (error?: Error | undefined) => void) => {
+export const setupHub = () => {
     const host = process.env.REACT_APP_SIGNALR_HOST;
     if(typeof host === "undefined")
         throw new Error("invalid host");
@@ -8,12 +8,10 @@ export const setupHub = (onClose: (error?: Error | undefined) => void) => {
     const newConnection = new HubConnectionBuilder()
         .withUrl(host, {
             skipNegotiation: true,
-            transport: HttpTransportType.ServerSentEvents
+            transport: HttpTransportType.WebSockets
         })
         .withAutomaticReconnect()
         .build();
-
-    newConnection.onclose(onClose);
 
     return newConnection;
 }

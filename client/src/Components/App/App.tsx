@@ -5,15 +5,19 @@ import Header from '../Header';
 import Footer from '../Footer';
 import Content from '../Content';
 import Admin from '../Admin';
+import AlertBar from '../AlertBar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { setWeatherData } from '../../reducers/weather/weather';
+import { setSensorsData } from '../../reducers/sensors/sensors';
 import { getCurrentUser, getCurrentWeather, getDailyWeather, getHourlyWeather } from '../../restService/restService';
 import { setSessionData, clearSession } from '../../reducers/session/session';
 import { getCookie, eraseCookie } from '../../helpers';
-import { ApplicationState } from 'src/reducers';
+import { ApplicationState } from '../../reducers';
 
-import { HttpTransportType, HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection } from '@microsoft/signalr';
 import { useState } from 'react';
+import { setupHub } from '../../signalR/signalR';
+import { SensorsState } from '../../reducers/sensors/types';
 
 const { useEffect } = React;
 
@@ -22,22 +26,70 @@ interface AppProps {
   username: string,
   setWeatherData: Function,
   setSessionData: Function,
+  setSensorsData: Function,
   clearSession: Function
 }
 
-const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessionData, clearSession }) => {
+const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessionData, setSensorsData, clearSession }) => {
 
+  const onRefresh = () => {
+    console.log('onRefresh');
+    createConnection();
+  }
 
-  //const [ connection, setConnection ] = useState<HubConnection | null>(null);
-  //const [sensorsData, setData] = useState(null);
+  const createConnection = () => {
+    setConnectionLost(false);
+    const defaultState: SensorsState = {
+      roomHumidity: '--',
+      roomPressure: '--',
+      roomTemp: '--',
+      waterTemp: '--'
+    }
+    setSensorsData(defaultState);
+    try {
+      let newConnection = setupHub();
+      newConnection.onclose(_ => {
+        console.log('connection  closed');
+        setConnectionLost(true);
+
+        setSensorsData(defaultState);
+      });
+
+      setConnection(newConnection);
+    }
+    catch {
+      setSensorsData(defaultState);
+    }
+  }
+
+  const [connection, setConnection] = useState<HubConnection | null>(null);
+  const [connectionLost, setConnectionLost] = useState<boolean>(false);
+
   useEffect(() => {
     const token = getCookie('token');
     if (token) {
       setSessionData({ authToken: token });
     }
 
-   // setupSignalR();
+    createConnection();
   }, [])
+
+  useEffect(() => {
+    if (connection) {
+      connection.start()
+        .then(_ => {
+          console.log('Connected!');
+          connection.on('RecieveDataAsync', data => {
+            console.log(data);
+            setSensorsData(data);
+          });
+        })
+        .catch(e => {
+          console.log('Connection failed: ', e);
+          setConnectionLost(true);
+        });
+    }
+  }, [connection]);
 
   useEffect(() => {
     const setCurrentUser = async () => {
@@ -56,7 +108,7 @@ const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessi
     }
   }, [authToken, username])
 
-  
+
 
   useEffect(() => {
     fetchCurrentWeather();
@@ -93,31 +145,32 @@ const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessi
     const daily = await getDailyWeather();
     setWeatherData({ daily });
   }
-  
+
   const fetchHourlyWeather = async () => {
     const hourly = await getHourlyWeather();
     setWeatherData({ hourly });
   }
 
- 
+
 
   return (
-      <div className="App">
-        <Router>
-          <Header />
-            <div className="appMiddle">
-              <Switch>
-                <Route path="/" exact>
-                  <Content />
-                </Route>
-                <Route path="/admin">
-                  <Admin />
-                </Route>
-              </Switch>
-            </div>
-          <Footer />
-        </Router>
-      </div>
+    <div className="App">
+      <Router>
+        <Header />
+        {connectionLost && <AlertBar onRefreshClicked={onRefresh} />}
+        <div className="appMiddle">
+          <Switch>
+            <Route path="/" exact>
+              <Content />
+            </Route>
+            <Route path="/admin">
+              <Admin />
+            </Route>
+          </Switch>
+        </div>
+        <Footer />
+      </Router>
+    </div>
   );
 }
 
@@ -134,6 +187,7 @@ export default connect(
   {
     setWeatherData,
     setSessionData,
+    setSensorsData,
     clearSession
   }
 )(App)

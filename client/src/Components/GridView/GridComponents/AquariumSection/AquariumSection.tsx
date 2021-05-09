@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { getWaterTemp } from '../../../../restService/restService';
+import { connect } from 'react-redux';
+import { ApplicationState } from '../../../../reducers';
 import { SensorsProps } from '../../GridView';
 import './AquariumSection.scss';
 
@@ -16,4 +17,16 @@ const AquariumSection : React.FC<SensorsProps> = ({waterTemp}) => {
   );
 }
 
-export default AquariumSection;
+const mapStateToProps = (state: ApplicationState) => {
+  const { sensors: { waterTemp } } = state;
+
+  return {
+    waterTemp
+  }
+};
+
+export default connect(
+  mapStateToProps,
+  {}
+)(AquariumSection)
+

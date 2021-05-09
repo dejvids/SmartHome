@@ -7,7 +7,7 @@ import HourlyItem from './HourlyItem/HourlyItem';
 import { Chart } from "react-google-charts";
 import Icon from '../../../Icon/Icon';
 import { CurrentWeather, DailyWeather, HourlyWeather } from '../../../../reducers/weather/types';
-import { ApplicationState } from 'src/reducers';
+import { ApplicationState } from '../../../../reducers';
 
 const { useState } = React;
 

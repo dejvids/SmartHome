@@ -2,11 +2,11 @@ import * as React from 'react';
 import './Room.scss';
 import Icon from '../../../Icon/Icon';
 import { SensorsProps } from '../../GridView';
+import { connect } from 'react-redux';
+import { ApplicationState } from '../../../../reducers';
 
-const Room : React.FC<SensorsProps> = ({roomTemp, roomPressure, roomHumidity, onRefresh, connected: connectionLost}) => {
-  const onClick = () => {
-    onRefresh();
-  }
+const Room : React.FC<SensorsProps> = ({roomTemp, roomPressure, roomHumidity}) => {
+
   return (
     <div className="room-section-component">
       <div className="room-tile">
@@ -24,11 +24,22 @@ const Room : React.FC<SensorsProps> = ({roomTemp, roomPressure, roomHumidity, on
         <span className="text-title">Wilgotność</span>
         <span className="text-value">{roomHumidity} %</span>
       </div>
-      {connectionLost &&
-        <button onClick={onClick}>Refresh</button>
-      }
     </div>
   );
 }
 
-export default Room;
+const mapStateToProps = (state: ApplicationState) => {
+  const { sensors: { roomHumidity, roomPressure, roomTemp } } = state;
+
+  return {
+    roomHumidity,
+    roomPressure,
+    roomTemp
+  }
+};
+
+export default connect(
+  mapStateToProps,
+  {}
+)(Room)
+

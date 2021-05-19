@@ -12,7 +12,7 @@ $api_key_value = ""; //REPLACE_WITH_API_KEY_FROM_ESP8266
 $api_key = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $api_key = test_input($_POST["api_key"]);
+    $api6_key = test_input($_POST["api_key"]);
     $sensor_name = test_input($_POST["name"]);
     $sensor_value = test_input($_POST["value"]);
     if($api_key == $api_key_value) {

@@ -83,6 +83,9 @@ const App: React.FC<AppProps> = ({ authToken, username, setWeatherData, setSessi
             console.log(data);
             setSensorsData(data);
           });
+          connection.on('SensorsDisconnectedAsync', _ => {
+            setConnectionLost(true);
+          })
         })
         .catch(e => {
           console.log('Connection failed: ', e);
